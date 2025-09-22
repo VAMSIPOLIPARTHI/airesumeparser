@@ -22,28 +22,50 @@ function App() {
 
   // Handle Enhance with AI
   const handleEnhance = async (section) => {
+    const content = resumeData[section]?.trim();
+
+    if (!content) {
+      alert(`Cannot enhance empty ${section} field.`);
+      return;
+    }
+
+    const payload = {
+      section,
+      content
+    };
+
+    console.log("Sending enhance request:", payload);
+
     try {
-      const response = await axios.post(`${BASE_URL}/ai-enhance`, {
-        section,
-        content: resumeData[section]
+      const response = await axios.post(`${BASE_URL}/ai-enhance`, payload, {
+        headers: { 'Content-Type': 'application/json' }
       });
-      setResumeData({
-        ...resumeData,
-        [section]: response.data.enhanced_content
-      });
+
+      if (response.data.enhanced_content) {
+        setResumeData({
+          ...resumeData,
+          [section]: response.data.enhanced_content
+        });
+      } else if (response.data.error) {
+        alert(`Enhance failed: ${response.data.error}`);
+      }
+
     } catch (error) {
-      console.error("Error enhancing section:", error);
+      console.error("Error enhancing section:", error.response?.data || error);
       alert("Failed to enhance. Check console for details.");
     }
   };
 
   // Handle Save Resume
   const handleSave = async () => {
+    console.log("Saving resume:", resumeData);
     try {
-      await axios.post(`${BASE_URL}/save-resume`, resumeData);
-      alert('Resume saved successfully!');
+      const response = await axios.post(`${BASE_URL}/save-resume`, resumeData, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      alert(response.data.status);
     } catch (error) {
-      console.error("Error saving resume:", error);
+      console.error("Error saving resume:", error.response?.data || error);
       alert("Failed to save. Check console for details.");
     }
   };
