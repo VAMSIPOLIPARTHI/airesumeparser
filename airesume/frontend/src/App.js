@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 function App() {
+  // Base URL for your deployed backend
+  const BASE_URL = "https://airesumeparser-tq4w.onrender.com";
+
   const [resumeData, setResumeData] = useState({
     name: '',
     experience: '',
@@ -20,7 +23,7 @@ function App() {
   // Handle Enhance with AI
   const handleEnhance = async (section) => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/ai-enhance', {
+      const response = await axios.post(`${BASE_URL}/ai-enhance`, {
         section,
         content: resumeData[section]
       });
@@ -29,17 +32,19 @@ function App() {
         [section]: response.data.enhanced_content
       });
     } catch (error) {
-      console.error(error);
+      console.error("Error enhancing section:", error);
+      alert("Failed to enhance. Check console for details.");
     }
   };
 
   // Handle Save Resume
   const handleSave = async () => {
     try {
-      await axios.post('http://127.0.0.1:8000/save-resume', resumeData);
+      await axios.post(`${BASE_URL}/save-resume`, resumeData);
       alert('Resume saved successfully!');
     } catch (error) {
-      console.error(error);
+      console.error("Error saving resume:", error);
+      alert("Failed to save. Check console for details.");
     }
   };
 
