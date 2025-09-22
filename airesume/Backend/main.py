@@ -9,13 +9,16 @@ genai.api_key = os.getenv("GEMINI_API_KEY")
 
 app = FastAPI()
 
-# Set your deployed frontend URL
-FRONTEND_URL = "https://your-frontend-url.vercel.app"  # <-- Replace with your actual frontend URL
+# Allowed origins
+origins = [
+    "https://airesumeparser-one.vercel.app",  # your frontend URL
+    "http://localhost:3000"                   # optional local testing
+]
 
-# Enable CORS only for your frontend
+# Enable CORS for these origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL],
+    allow_origins=origins,  # <-- Use the list, not a single variable
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,10 +35,10 @@ class Resume(BaseModel):
     education: str
     skills: str
 
-# Temporary in-memory storage for resumes
+# Temporary in-memory storage
 resume_storage = {}
 
-# Endpoint to enhance resume sections using Gemini
+# Endpoint to enhance resume sections
 @app.post("/ai-enhance")
 async def ai_enhance(request: EnhanceRequest):
     try:
@@ -52,7 +55,7 @@ async def ai_enhance(request: EnhanceRequest):
     except Exception as e:
         return {"error": str(e)}
 
-# Endpoint to save the complete resume
+# Endpoint to save resume
 @app.post("/save-resume")
 async def save_resume(resume: Resume):
     resume_storage["resume"] = resume.dict()
